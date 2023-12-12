@@ -1,0 +1,253 @@
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Scanner;
+
+class Teacher {
+    private String fullName;
+    private int age;
+    private List<Course> courses;
+
+    public Teacher(String fullName, int age) {
+        this.fullName = fullName;
+        this.age = age;
+        this.courses = new ArrayList<>();
+    }
+
+    public String getFullName() {
+        return fullName;
+    }
+
+    public int getAge() {
+        return age;
+    }
+
+    public List<Course> getCourses() {
+        return courses;
+    }
+
+    public void addCourse(Course course) {
+        courses.add(course);
+    }
+
+    public void removeCourse(Course course) {
+        courses.remove(course);
+    }
+}
+
+class Course {
+    private String name;
+    private int hours;
+
+    public Course(String name, int hours) {
+        this.name = name;
+        this.hours = hours;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public int getHours() {
+        return hours;
+    }
+}
+
+public class Main {
+    private static Map<Teacher, List<Course>> teacherCoursesMap = new HashMap<>();
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+
+        while (true) {
+            System.out.println("1. Добавить преподавателя и курс");
+            System.out.println("2. Удалить преподавателя и курс");
+            System.out.println("3. Редактировать курсы преподавателя");
+            System.out.println("4. Показать всех преподавателей и их курсы");
+            System.out.println("5. Показать курсы отдельно");
+            System.out.println("6. Показать преподавателей отдельно");
+            System.out.println("7. Выход");
+
+            int choice = scanner.nextInt();
+            scanner.nextLine(); 
+
+            switch (choice) {
+                case 1:
+                    addTeacherAndCourse(scanner);
+                    break;
+                case 2:
+                    removeTeacherAndCourse(scanner);
+                    break;
+                case 3:
+                    editTeacherCourses(scanner);
+                    break;
+                case 4:
+                    showAllTeachersAndCourses();
+                    break;
+                case 5:
+                    showAllCourses();
+                    break;
+                case 6:
+                    showAllTeachers();
+                    break;
+                case 7:
+                    System.out.println("Выход из программы.");
+                    System.exit(0);
+                    break;
+                default:
+                    System.out.println("Неверный выбор. Попробуйте еще раз.");
+            }
+        }
+    }
+
+    private static void addTeacherAndCourse(Scanner scanner) {
+        System.out.print("Введите ФИО преподавателя: ");
+        String fullName = scanner.nextLine();
+        System.out.print("Введите возраст преподавателя: ");
+        int age = scanner.nextInt();
+        scanner.nextLine(); 
+
+        Teacher teacher = new Teacher(fullName, age);
+
+        System.out.print("Введите название курса: ");
+        String courseName = scanner.nextLine();
+        System.out.print("Введите количество часов курса: ");
+        int hours = scanner.nextInt();
+
+        Course course = new Course(courseName, hours);
+
+        teacher.addCourse(course);
+        teacherCoursesMap.put(teacher, teacher.getCourses());
+
+        System.out.println("Преподаватель и курс успешно добавлены.");
+    }
+
+    private static void removeTeacherAndCourse(Scanner scanner) {
+        System.out.print("Введите ФИО преподавателя, которого хотите удалить: ");
+        String fullName = scanner.nextLine();
+
+        Teacher teacherToRemove = null;
+        for (Teacher teacher : teacherCoursesMap.keySet()) {
+            if (teacher.getFullName().equalsIgnoreCase(fullName)) {
+                teacherToRemove = teacher;
+                break;
+            }
+        }
+
+        if (teacherToRemove != null) {
+            teacherCoursesMap.remove(teacherToRemove);
+            System.out.println("Преподаватель успешно удален.");
+        } else {
+            System.out.println("Преподаватель не найден.");
+        }
+    }
+
+    private static void editTeacherCourses(Scanner scanner) {
+        System.out.print("Введите ФИО преподавателя, чьи курсы вы хотите отредактировать: ");
+        String fullName = scanner.nextLine();
+
+        Teacher teacherToEdit = null;
+        for (Teacher teacher : teacherCoursesMap.keySet()) {
+            if (teacher.getFullName().equalsIgnoreCase(fullName)) {
+                teacherToEdit = teacher;
+                break;
+            }
+        }
+
+        if (teacherToEdit != null) {
+            List<Course> courses = teacherToEdit.getCourses();
+
+            while (true) {
+                System.out.println("Текущие курсы преподавателя " + fullName + ":");
+                for (int i = 0; i < courses.size(); i++) {
+                    System.out.println((i + 1) + ". " + courses.get(i).getName() + " (" + courses.get(i).getHours() + " часов)");
+                }
+
+                System.out.println("1. Добавить курс");
+                System.out.println("2. Удалить курс");
+                System.out.println("3. Завершить редактирование");
+
+                int choice = scanner.nextInt();
+                scanner.nextLine();
+
+                switch (choice) {
+                    case 1:
+                        addCourseToTeacher(scanner, teacherToEdit);
+                        break;
+                    case 2:
+                        removeCourseFromTeacher(scanner, teacherToEdit);
+                        break;
+                    case 3:
+                        System.out.println("Редактирование завершено.");
+                        return;
+                    default:
+                        System.out.println("Неверный выбор. Попробуйте еще раз.");
+                }
+            }
+        } else {
+            System.out.println("Преподаватель не найден.");
+        }
+    }
+
+    private static void addCourseToTeacher(Scanner scanner, Teacher teacher) {
+        System.out.print("Введите название курса: ");
+        String courseName = scanner.nextLine();
+        System.out.print("Введите количество часов курса: ");
+        int hours = scanner.nextInt();
+
+        Course course = new Course(courseName, hours);
+        teacher.addCourse(course);
+
+        System.out.println("Курс успешно добавлен.");
+    }
+
+    private static void removeCourseFromTeacher(Scanner scanner, Teacher teacher) {
+        System.out.print("Введите название курса, который хотите удалить: ");
+        String courseName = scanner.nextLine();
+
+        Course courseToRemove = null;
+        for (Course course : teacher.getCourses()) {
+            if (course.getName().equalsIgnoreCase(courseName)) {
+                courseToRemove = course;
+                break;
+            }
+        }
+
+        if (courseToRemove != null) {
+            teacher.removeCourse(courseToRemove);
+            System.out.println("Курс успешно удален.");
+        } else {
+            System.out.println("Курс не найден.");
+        }
+    }
+
+    private static void showAllTeachersAndCourses() {
+        for (Map.Entry<Teacher, List<Course>> entry : teacherCoursesMap.entrySet()) {
+            Teacher teacher = entry.getKey();
+            List<Course> courses = entry.getValue();
+
+            System.out.println("Преподаватель: " + teacher.getFullName() + ", Возраст: " + teacher.getAge());
+            System.out.println("Курсы:");
+            for (Course course : courses) {
+                System.out.println("- " + course.getName() + " (" + course.getHours() + " часов)");
+            }
+            System.out.println();
+        }
+    }
+
+    private static void showAllCourses() {
+        for (Map.Entry<Teacher, List<Course>> entry : teacherCoursesMap.entrySet()) {
+            List<Course> courses = entry.getValue();
+            for (Course course : courses) {
+                System.out.println(course.getName() + " (" + course.getHours() + " часов)");
+            }
+        }
+    }
+
+    private static void showAllTeachers() {
+        for (Teacher teacher : teacherCoursesMap.keySet()) {
+            System.out.println("Преподаватель: " + teacher.getFullName() + ", Возраст: " + teacher.getAge());
+        }
+    }
+}
